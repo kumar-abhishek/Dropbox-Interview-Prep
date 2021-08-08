@@ -1,3 +1,61 @@
+Idea is simple:
+Use a hashmap with names vectors to store all files contents, and then prints the duplicates
+...
+
+vector<vector<string>> findDuplicate(vector<string>& paths) {
+    unordered_map<string, vector<string>> files;
+    vector<vector<string>> result;
+
+    for (auto path : paths) {
+	    stringstream ss(path);
+	    string root;
+	    string s;
+	    getline(ss, root, ' ');
+	    while (getline(ss, s, ' ')) {
+		    string fileName = root + '/' + s.substr(0, s.find('('));
+		    string fileContent = s.substr(s.find('(') + 1, s.find(')') - s.find('(') - 1);
+		    files[fileContent].push_back(fileName);
+	    }
+    }
+
+    for (auto file : files) {
+	    if (file.second.size() > 1)
+		    result.push_back(file.second);
+    }
+
+    return result;
+}
+...
+Follow up questions:
+
+1. Imagine you are given a real file system, how will you search files? DFS or BFS ?
+BFS can take advantage of the locality of files in inside directories, and therefore will probably be faster
+
+2. If the file content is very large (GB level), how will you modify your solution?
+In a real life solution we will not hash the entire file content, since it's not practical. Instead we will first map all the files according to size. Files with different sizes are guaranteed to be different. We will than hash a small part of the files with equal sizes (using MD5 for example). Only if the md5 is the same, we will compare the files byte by byte
+
+3. If you can only read the file by 1kb each time, how will you modify your solution?
+This won't change the solution. We can create the hash from the 1kb chunks, and then read the entire file if a full byte by byte comparison is required.
+
+What is the time complexity of your modified solution? What is the most time consuming part and memory consuming part of it? How to optimize?
+Time complexity is O(n^2 * k) since in worse case we might need to compare every file to all others. k is the file size
+
+How to make sure the duplicated files you find are not false positive?
+We will use several filters to compare: File size, Hash and byte by byte comparisons.
+
+Thanks for writing this awesome answer and your response to the follow-up questions,
+I just wanted to make up a few points that you missed:
+
+MD5 is definitely one way to hash a file, another more optimal alternative is to use SHA256. Reference
+
+Also, to answer this What is the most time consuming part and memory consuming part of it? How to optimize? part:
+Comparing the file (by size, by hash and eventually byte by byte) is the most time consuming part.
+Generating hash for every file will be the most memory consuming part. 
+We follow the above procedure will optimize it, since we compare files by size first, only when sizes differ, we'll generate and compare hashes, and only when hashes are the same, we'll compare byte by byte.
+Also, using better hashing algorithm will also reduce memory/time.
+Reference:https://stackoverflow.com/questions/2722943/is-calculating-an-md5-hash-less-cpu-intensive-than-sha-family-functions
+    
+=========
 """
 Dropbox
 
